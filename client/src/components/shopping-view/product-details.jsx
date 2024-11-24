@@ -11,11 +11,12 @@ import { setProductDetails } from "@/store/shop/products-slice";
 import { Label } from "../ui/label";
 import StarRatingComponent from "../common/star-rating";
 import { useEffect, useState } from "react";
-import { addReview, getReviews } from "@/store/shop/review-slice";
+import { addReview, getReviews, updateReview } from "@/store/shop/review-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
+  const [editingReviewId, setEditingReviewId] = useState(null);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
@@ -71,25 +72,37 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
     setReviewMsg("");
   }
 
+  function handleEditReview(reviewItem) {
+    setReviewMsg(reviewItem.reviewMessage);
+    setRating(reviewItem.reviewValue);
+    setEditingReviewId(reviewItem._id);
+  }
+
   function handleAddReview() {
-    dispatch(
-      addReview({
-        productId: productDetails?._id,
-        userId: user?.id,
-        userName: user?.userName,
-        reviewMessage: reviewMsg,
-        reviewValue: rating,
+    const reviewData = {
+      productId: productDetails?._id,
+      userId: user?.id,
+      userName: user?.userName,
+      reviewMessage: reviewMsg,
+      reviewValue: rating,
+    };
+
+    const action = editingReviewId ? updateReview : addReview;
+
+    dispatch(action({ ...reviewData, reviewId: editingReviewId }))
+      .then((data) => {
+        if (data.payload && data.payload.success) {
+          setReviewMsg("");
+          setRating(0);
+          setEditingReviewId(null);
+          dispatch(getReviews(productDetails?._id));
+        } else {
+          console.error("Failed to update review:", data);
+        }
       })
-    ).then((data) => {
-      if (data.payload.success) {
-        setRating(0);
-        setReviewMsg("");
-        dispatch(getReviews(productDetails?._id));
-        toast({
-          title: "Review added successfully!",
-        });
-      }
-    });
+      .catch((error) => {
+        console.error("Error updating review:", error);
+      });
   }
 
   useEffect(() => {
@@ -103,6 +116,8 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
       ? reviews.reduce((sum, reviewItem) => sum + reviewItem.reviewValue, 0) /
         reviews.length
       : 0;
+
+  console.log("Editing review ID:", editingReviewId);
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
@@ -187,6 +202,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                         {reviewItem.reviewMessage}
                       </p>
                     </div>
+                    <Button onClick={() => handleEditReview(reviewItem)}>Edit</Button>
                   </div>
                 ))
               ) : (
@@ -194,11 +210,11 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               )}
             </div>
             <div className="mt-10 flex-col flex gap-2">
-              <Label>Write a review</Label>
+              <Label>{editingReviewId ? "Edit your review" : "Write a review"}</Label>
               <div className="flex gap-1">
                 <StarRatingComponent
                   rating={rating}
-                  handleRatingChange={handleRatingChange}
+                  handleRatingChange={setRating}
                 />
               </div>
               <Input
@@ -211,7 +227,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                 onClick={handleAddReview}
                 disabled={reviewMsg.trim() === ""}
               >
-                Submit
+                {editingReviewId ? "Update" : "Submit"}
               </Button>
             </div>
           </div>

@@ -44,7 +44,11 @@ function ShoppingListing() {
   );
   const { cartItems } = useSelector((state) => state.shopCart);
   const { user } = useSelector((state) => state.auth);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({
+    category: [],
+    brand: [],
+    price: null,
+  });
   const [sort, setSort] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
@@ -58,24 +62,33 @@ function ShoppingListing() {
 
   function handleFilter(getSectionId, getCurrentOption) {
     let cpyFilters = { ...filters };
-    const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
-
-    if (indexOfCurrentSection === -1) {
-      cpyFilters = {
-        ...cpyFilters,
-        [getSectionId]: [getCurrentOption],
-      };
+    
+    if (getSectionId === "price") {
+        // Handle price filtering logic
+        const priceRange = getCurrentOption.split("-");
+        const minPrice = parseInt(priceRange[0]);
+        const maxPrice = priceRange[1] === "+" ? Infinity : parseInt(priceRange[1]);
+        
+        cpyFilters.price = { min: minPrice, max: maxPrice }; // Store as an object
     } else {
-      const indexOfCurrentOption =
-        cpyFilters[getSectionId].indexOf(getCurrentOption);
-
-      if (indexOfCurrentOption === -1)
-        cpyFilters[getSectionId].push(getCurrentOption);
-      else cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
+        // Handle other filters (category, brand)
+        if (!cpyFilters[getSectionId]) {
+            cpyFilters[getSectionId] = [];
+        }
+        
+        const indexOfCurrentOption = cpyFilters[getSectionId].indexOf(getCurrentOption);
+        if (indexOfCurrentOption === -1) {
+            cpyFilters[getSectionId].push(getCurrentOption);
+        } else {
+            cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
+        }
     }
 
     setFilters(cpyFilters);
     sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
+
+    // Fetch products with updated filters
+    fetchFilteredProducts(cpyFilters);
   }
 
   function handleGetProductDetails(getCurrentProductId) {
@@ -144,6 +157,24 @@ function ShoppingListing() {
   }, [productDetails]);
 
   console.log(productList, "productListproductListproductList");
+
+  const fetchFilteredProducts = async (filterParams) => {
+    try {
+        const response = await dispatch(fetchAllFilteredProducts({ filterParams }));
+        
+        if (response?.payload?.success) {
+            // Handle successful response, e.g., update state or show a message
+            console.log("Filtered products fetched successfully:", response.payload.data);
+        } else {
+            // Handle error case
+            console.error("Failed to fetch filtered products:", response.payload.message);
+        }
+    } catch (error) {
+        console.error("Error fetching filtered products:", error);
+    }
+  };
+
+  console.log("Current Filters:", filters);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">

@@ -1,7 +1,7 @@
 export const registerFormControls = [
   {
     name: "userName",
-    label: "User Name",
+    label: "Username",
     placeholder: "Enter your user name",
     componentType: "input",
     type: "text",
@@ -177,6 +177,12 @@ export const filterOptions = {
     { id: "zebronics", label: "Zebronics" },
     { id: "other", label: "Other" },
   ],
+  price: [
+    { id: "0-50", label: "$0 - $50" },
+    { id: "51-100", label: "$51 - $100" },
+    { id: "101-200", label: "$101 - $200" },
+    { id: "201+", label: "$201 and above" },
+  ],
 };
 
 export const sortOptions = [
@@ -220,5 +226,22 @@ export const addressFormControls = [
     name: "notes",
     componentType: "textarea",
     placeholder: "Enter any additional notes",
+  },
+];
+
+export const accountFormControls = [
+  {
+    label: "Username",
+    name: "userName",
+    componentType: "input",
+    type: "text",
+    placeholder: "Enter your username",
+  },
+  {
+    label: "Email",
+    name: "email",
+    componentType: "input",
+    type: "email",
+    placeholder: "Enter your email",
   },
 ];

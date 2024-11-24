@@ -1,6 +1,42 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { auth, provider } from "@/firebase";
+import { signInWithPopup } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { loginUser } from "@/store/auth-slice";
+import { useToast } from "@/components/ui/use-toast";
 
 function AuthLayout() {
+  const dispatch = useDispatch();
+  const { toast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      dispatch(loginUser({
+        email: user.email,
+        userName: user.displayName,
+        googleIdToken: idToken,
+      }));
+
+      toast({
+        title: "Logged in successfully with Google!",
+      });
+
+      navigate("/shop/home/");
+    } catch (error) {
+      console.error("Login Error:", error);
+      toast({
+        title: "Error logging in with Google",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full">
       <div className="hidden lg:flex items-center justify-center bg-black w-1/2 px-12">
@@ -18,7 +54,14 @@ function AuthLayout() {
         </div>
       </div>
       <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-        <Outlet />
+        <div className="mx-auto w-full max-w-md space-y-6">
+          {location.pathname === "/login" && (
+            <button onClick={handleGoogleLogin} className="w-full bg-blue-500 text-white py-2 rounded">
+              Sign in with Google
+            </button>
+          )}
+          <Outlet />
+        </div>
       </div>
     </div>
   );
