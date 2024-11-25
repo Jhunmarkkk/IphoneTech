@@ -20,6 +20,8 @@ import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -53,6 +55,8 @@ function ShoppingListing() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const categorySearchParam = searchParams.get("category");
 
@@ -158,6 +162,14 @@ function ShoppingListing() {
 
   console.log(productList, "productListproductListproductList");
 
+  const indexOfLastProduct = currentPage * itemsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+  const currentProducts = productList.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
   const fetchFilteredProducts = async (filterParams) => {
     try {
         const response = await dispatch(fetchAllFilteredProducts({ filterParams }));
@@ -213,8 +225,8 @@ function ShoppingListing() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-          {productList && productList.length > 0
-            ? productList.map((productItem) => (
+          {currentProducts && currentProducts.length > 0
+            ? currentProducts.map((productItem) => (
                 <ShoppingProductTile
                   handleGetProductDetails={handleGetProductDetails}
                   product={productItem}
@@ -222,6 +234,15 @@ function ShoppingListing() {
                 />
               ))
             : null}
+        </div>
+        <div className="flex justify-center p-4">
+          <Pagination
+            count={Math.ceil(productList.length / itemsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            variant="outlined"
+            color="primary"
+          />
         </div>
       </div>
       <ProductDetailsDialog
