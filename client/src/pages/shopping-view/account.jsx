@@ -18,6 +18,7 @@ function ShoppingAccount() {
             <TabsList>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="address">Address</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
             <TabsContent value="orders">
               <ShoppingOrders />

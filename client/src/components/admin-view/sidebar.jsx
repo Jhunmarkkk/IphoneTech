@@ -3,6 +3,7 @@ import {
   ChartNoAxesCombined,
   LayoutDashboard,
   ShoppingBasket,
+  ChartColumnDecreasing,
 } from "lucide-react";
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,12 @@ const adminSidebarMenuItems = [
     path: "/admin/orders",
     icon: <BadgeCheck />,
   },
+  // {
+  //   id: "charts",
+  //   label: "Charts",
+  //   path: "/admin/charts",
+  //   icon: <ChartColumnDecreasing />,
+  // },
 ];
 
 function MenuItems({ setOpen }) {
