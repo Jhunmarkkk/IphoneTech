@@ -32,11 +32,7 @@ export const getReviews = createAsyncThunk(
 export const updateReview = createAsyncThunk(
   'reviews/updateReview',
   async ({ reviewId, ...reviewData }) => {
-<<<<<<< HEAD
     const response = await axios.put(`/api/reviews/${reviewId}`, reviewData);
-=======
-    const response = await axios.put(`/api/reviews/${id}`, reviewData);
->>>>>>> b2949c4fc0c05b5656d8d540009e2d37856652db
     return response.data;
   }
 );
