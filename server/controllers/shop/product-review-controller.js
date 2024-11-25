@@ -81,4 +81,22 @@ const getProductReviews = async (req, res) => {
   }
 };
 
-module.exports = { addProductReview, getProductReviews };
+const updateReview = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the review ID from the URL
+    const updatedData = req.body; // Get the updated data from the request body
+
+    const updatedReview = await ProductReview.findByIdAndUpdate(id, updatedData, { new: true });
+
+    if (!updatedReview) {
+      return res.status(404).json({ success: false, message: "Review not found" });
+    }
+
+    res.status(200).json({ success: true, data: updatedReview });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error updating review" });
+  }
+};
+
+module.exports = { addProductReview, getProductReviews, updateReview };

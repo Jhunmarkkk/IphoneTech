@@ -7,7 +7,7 @@ const initialState = {
 };
 
 export const addReview = createAsyncThunk(
-  "/order/addReview",
+  "reviews/addReview",
   async (formdata) => {
     const response = await axios.post(
       `http://localhost:5000/api/shop/review/add`,
@@ -18,13 +18,24 @@ export const addReview = createAsyncThunk(
   }
 );
 
-export const getReviews = createAsyncThunk("/order/getReviews", async (id) => {
-  const response = await axios.get(
-    `http://localhost:5000/api/shop/review/${id}`
-  );
+export const getReviews = createAsyncThunk(
+  "reviews/getReviews",
+  async (id) => {
+    const response = await axios.get(
+      `http://localhost:5000/api/shop/review/${id}`
+    );
 
-  return response.data;
-});
+    return response.data;
+  }
+);
+
+export const updateReview = createAsyncThunk(
+  'reviews/updateReview',
+  async ({ reviewId, ...reviewData }) => {
+    const response = await axios.put(`/api/reviews/${reviewId}`, reviewData);
+    return response.data;
+  }
+);
 
 const reviewSlice = createSlice({
   name: "reviewSlice",
@@ -42,6 +53,12 @@ const reviewSlice = createSlice({
       .addCase(getReviews.rejected, (state) => {
         state.isLoading = false;
         state.reviews = [];
+      })
+      .addCase(updateReview.fulfilled, (state, action) => {
+        const index = state.reviews.findIndex(review => review._id === action.payload._id);
+        if (index !== -1) {
+          state.reviews[index] = action.payload;
+        }
       });
   },
 });

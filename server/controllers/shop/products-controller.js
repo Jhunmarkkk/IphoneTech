@@ -2,7 +2,7 @@ const Product = require("../../models/Product");
 
 const getFilteredProducts = async (req, res) => {
   try {
-    const { category = [], brand = [], sortBy = "price-lowtohigh" } = req.query;
+    const { category = [], brand = [], price = {}, sortBy = "price-lowtohigh" } = req.query;
 
     let filters = {};
 
@@ -13,6 +13,12 @@ const getFilteredProducts = async (req, res) => {
     if (brand.length) {
       filters.brand = { $in: brand.split(",") };
     }
+
+    if (price.min !== undefined && price.max !== undefined) {
+      filters.price = { $gte: price.min, $lte: price.max };
+    }
+
+    console.log("Filters received:", filters);
 
     let sort = {};
 
@@ -47,10 +53,10 @@ const getFilteredProducts = async (req, res) => {
       data: products,
     });
   } catch (e) {
-    console.log(error);
+    console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured",
+      message: "Some error occurred",
     });
   }
 };
